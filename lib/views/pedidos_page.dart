@@ -21,8 +21,7 @@ class PedidosPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Map<String, dynamic>> carrito = [];
-
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text("Mis Pedidos"),
@@ -44,7 +43,7 @@ class PedidosPage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => CarritoPage(productos: carrito),
+                  builder: (_) => const CarritoPage(),
                 ),
               );
             },
@@ -84,28 +83,79 @@ class PedidosPage extends StatelessWidget {
                 }
 
                 return ListView.builder(
+                  padding: const EdgeInsets.all(12),
                   itemCount: pedidos.length,
                   itemBuilder: (context, index) {
                     final pedido = pedidos[index].data() as Map<String, dynamic>;
                     final productos = List<Map<String, dynamic>>.from(pedido['productos']);
                     final fecha = (pedido['fecha'] as Timestamp).toDate();
 
-                    return Card(
-                      margin: const EdgeInsets.all(12),
+                    return Container(
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
                       child: Padding(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Fecha: ${fecha.toLocal()}",
-                                style: const TextStyle(fontWeight: FontWeight.bold)),
+                            Row(
+                              children: [
+                                const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
+                                const SizedBox(width: 6),
+                                Text(
+                                  "${fecha.day}/${fecha.month}/${fecha.year} ${fecha.hour}:${fecha.minute.toString().padLeft(2, '0')}",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 14,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
                             Text("Tipo de entrega: ${pedido['tipoEntrega']}"),
                             Text("Tipo de pago: ${pedido['tipoPago']}"),
-                            Text("Estado: ${pedido['estado']}"),
-                            Text("Total: S/. ${pedido['total'].toStringAsFixed(2)}"),
-                            const SizedBox(height: 8),
-                            const Text("Productos:", style: TextStyle(fontWeight: FontWeight.bold)),
-                            ...productos.map((p) => Text("- ${p['nombre']} x${p['cantidad']}")),
+                            Text(
+                              "Estado: ${pedido['estado']}",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blueGrey,
+                              ),
+                            ),
+                            Text(
+                              "Total: S/. ${pedido['total'].toStringAsFixed(2)}",
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            const Divider(height: 24),
+                            const Text("Productos:",
+                                style: TextStyle(fontWeight: FontWeight.bold)),
+                            ...productos.map(
+                              (p) => Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 2),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.circle, size: 6, color: Colors.brown),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        "${p['nombre']} x${p['cantidad']}",
+                                        style: const TextStyle(fontSize: 14),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -115,10 +165,12 @@ class PedidosPage extends StatelessWidget {
               },
             ),
           ),
-          const SizedBox(height: 10),
-          const Center(child: Text("Síguenos en nuestras redes")),
+          const SizedBox(height: 12),
+          const Divider(),
+          const Text("Síguenos en nuestras redes"),
           const SizedBox(height: 6),
           const SocialButtons(),
+          const SizedBox(height: 16),
         ],
       ),
     );

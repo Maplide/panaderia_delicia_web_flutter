@@ -12,59 +12,64 @@ class SidebarMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: const Color(0xFFF2CDA0),
-      child: ListView(
-        padding: EdgeInsets.zero,
+      backgroundColor: const Color(0xFFFFF3E0), // color crema claro
+      child: Column(
         children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(
-              color: Color(0xFFF21D44),
+          const SizedBox(height: 36),
+          const CircleAvatar(
+            radius: 36,
+            backgroundColor: Colors.white,
+            child: Icon(Icons.bakery_dining, size: 32, color: Color(0xFFF21D44)),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Panadería Delicia',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFFB71C1C),
             ),
-            child: Text('Panadería Delicia',
-                style: TextStyle(color: Colors.white, fontSize: 24)),
+          ),
+          const SizedBox(height: 24),
+          _buildMenuItem(
+            context,
+            icon: Icons.home,
+            text: 'Inicio',
+            page: const HomePage(),
+          ),
+          _buildMenuItem(
+            context,
+            icon: Icons.shopping_bag,
+            text: 'Productos',
+            page: const ProductosPage(),
+          ),
+          _buildMenuItem(
+            context,
+            icon: Icons.list_alt,
+            text: 'Mis Pedidos',
+            page: const PedidosPage(),
+          ),
+          _buildMenuItem(
+            context,
+            icon: Icons.map,
+            text: 'Ubicación',
+            page: const UbicacionPage(),
           ),
           ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text('Inicio'),
-            onTap: () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const HomePage()));
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.shopping_bag),
-            title: const Text('Productos'),
-            onTap: () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const ProductosPage()));
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.list_alt),
-            title: const Text('Mis Pedidos'),
-            onTap: () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const PedidosPage()));
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.map),
-            title: const Text('Ubicación'),
-            onTap: () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const UbicacionPage()));
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.admin_panel_settings),
+            leading: const Icon(Icons.admin_panel_settings, color: Colors.black87),
             title: const Text('Administrar productos'),
             onTap: () {
-              Navigator.pushNamed(context, '/admin-productos');
+              Navigator.pushReplacementNamed(context, '/admin-productos');
             },
           ),
+          const Spacer(),
+          const Divider(),
           ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('Cerrar sesión'),
+            leading: const Icon(Icons.logout, color: Colors.red),
+            title: const Text(
+              'Cerrar sesión',
+              style: TextStyle(color: Colors.red),
+            ),
             onTap: () async {
               await FirebaseAuth.instance.signOut();
               Navigator.pushAndRemoveUntil(
@@ -74,8 +79,23 @@ class SidebarMenu extends StatelessWidget {
               );
             },
           ),
+          const SizedBox(height: 12),
         ],
       ),
+    );
+  }
+
+  Widget _buildMenuItem(BuildContext context,
+      {required IconData icon, required String text, required Widget page}) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.black87),
+      title: Text(text),
+      onTap: () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => page),
+        );
+      },
     );
   }
 }

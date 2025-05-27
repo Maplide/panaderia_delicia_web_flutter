@@ -6,16 +6,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:panaderia_delicia_web/views/login_page.dart';
 import 'package:panaderia_delicia_web/widgets/sidebar_menu.dart';
 import 'package:panaderia_delicia_web/widgets/social_buttons.dart';
+import 'package:provider/provider.dart';
+import 'package:panaderia_delicia_web/providers/carrito_provider.dart';
 
-class ProductosPage extends StatefulWidget {
+class ProductosPage extends StatelessWidget {
   const ProductosPage({super.key});
-
-  @override
-  State<ProductosPage> createState() => _ProductosPageState();
-}
-
-class _ProductosPageState extends State<ProductosPage> {
-  List<Map<String, dynamic>> carrito = [];
 
   String convertirEnlaceDriveADirecto(String enlaceDrive) {
     final regExp = RegExp(r'/d/([a-zA-Z0-9_-]+)');
@@ -28,21 +23,10 @@ class _ProductosPageState extends State<ProductosPage> {
     }
   }
 
-  void agregarAlCarrito(Map<String, dynamic> producto) {
-    final productoConCantidad = Map<String, dynamic>.from(producto);
-    productoConCantidad['cantidad'] = 1;
-
-    setState(() {
-      carrito.add(productoConCantidad);
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${producto['nombre']} añadido al carrito')),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final carritoProvider = Provider.of<CarritoProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Productos"),
@@ -57,17 +41,52 @@ class _ProductosPageState extends State<ProductosPage> {
               );
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.shopping_cart),
-            tooltip: "Carrito",
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => CarritoPage(productos: carrito),
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.shopping_cart),
+                tooltip: "Carrito",
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const CarritoPage()),
+                  );
+                },
+              ),
+              if (carritoProvider.totalCantidad > 0)
+                Positioned(
+                  right: 6,
+                  top: 6,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    transitionBuilder: (child, animation) {
+                      return ScaleTransition(
+                        scale: CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.elasticOut,
+                        ),
+                        child: child,
+                      );
+                    },
+                    child: Container(
+                      key: ValueKey<int>(carritoProvider.totalCantidad),
+                      padding: const EdgeInsets.all(5),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '${carritoProvider.totalCantidad}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              );
-            },
+            ],
           ),
           IconButton(
             icon: const Icon(Icons.logout),
@@ -100,48 +119,96 @@ class _ProductosPageState extends State<ProductosPage> {
             children: [
               Expanded(
                 child: GridView.builder(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(16),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: 0.75,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.7,
                   ),
                   itemCount: productos.length,
                   itemBuilder: (context, index) {
                     final data = productos[index].data() as Map<String, dynamic>;
-                    return Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Expanded(
-                            child: Image.network(
-                              convertirEnlaceDriveADirecto(data['imagen']),
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.broken_image),
+                          ClipRRect(
+                            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                            child: AspectRatio(
+                              aspectRatio: 1.5,
+                              child: Image.network(
+                                convertirEnlaceDriveADirecto(data['imagen']),
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    const Icon(Icons.broken_image, size: 60),
+                              ),
                             ),
                           ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              data['nombre'],
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: Text("S/. ${data['precio']}"),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: ElevatedButton(
-                              onPressed: () => agregarAlCarrito(data),
-                              child: const Text("Agregar"),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  data['nombre'],
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  "S/. ${data['precio']}",
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Color(0xFFA64F1C),
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFFF21D44),
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(vertical: 10),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      final producto = {
+                                        'nombre': data['nombre'],
+                                        'precio': data['precio'],
+                                        'imagen': data['imagen'],
+                                      };
+                                      carritoProvider.agregarProducto(producto);
+
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('${data['nombre']} añadido al carrito'),
+                                          duration: const Duration(milliseconds: 800),
+                                        ),
+                                      );
+                                    },
+                                    child: const Text("Agregar"),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
@@ -150,11 +217,15 @@ class _ProductosPageState extends State<ProductosPage> {
                   },
                 ),
               ),
+              const SizedBox(height: 10),
+              const Divider(),
+              const Text(
+                "Síguenos en nuestras redes",
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
               const SizedBox(height: 8),
-              const Center(child: Text("Síguenos en nuestras redes")),
-              const SizedBox(height: 4),
               const SocialButtons(),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
             ],
           );
         },

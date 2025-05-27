@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SocialButtons extends StatelessWidget {
@@ -16,19 +17,46 @@ class SocialButtons extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        IconButton(
-          icon: const Icon(Icons.facebook, color: Colors.blue),
-          onPressed: () => _launchUrl('https://www.facebook.com/PanaderiaDelicia'),
+        _buildSocialIcon(
+          icon: FontAwesomeIcons.facebookF,
+          color: Colors.blue[800],
+          tooltip: 'Facebook',
+          url: 'https://www.facebook.com/PanaderiaDelicia',
         ),
-        IconButton(
-          icon: const Icon(Icons.message, color: Colors.green),
-          onPressed: () => _launchUrl('https://wa.me/51987654321'),
+        const SizedBox(width: 12),
+        _buildSocialIcon(
+          icon: FontAwesomeIcons.whatsapp,
+          color: Colors.green[700],
+          tooltip: 'WhatsApp',
+          url: 'https://wa.me/51987654321',
         ),
-        IconButton(
-          icon: const Icon(Icons.language, color: Colors.purple),
-          onPressed: () => _launchUrl('https://www.instagram.com/PanaderiaDelicia'),
+        const SizedBox(width: 12),
+        _buildSocialIcon(
+          icon: FontAwesomeIcons.instagram,
+          color: Colors.purple[400],
+          tooltip: 'Instagram',
+          url: 'https://www.instagram.com/PanaderiaDelicia',
         ),
       ],
+    );
+  }
+
+  Widget _buildSocialIcon({
+    required IconData icon,
+    required Color? color,
+    required String tooltip,
+    required String url,
+  }) {
+    return Tooltip(
+      message: tooltip,
+      child: GestureDetector(
+        onTap: () => _launchUrl(url),
+        child: CircleAvatar(
+          radius: 20,
+          backgroundColor: color!.withOpacity(0.1),
+          child: Icon(icon, color: color, size: 20),
+        ),
+      ),
     );
   }
 }
