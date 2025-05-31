@@ -53,43 +53,75 @@ class _AdminProductosPageState extends State<AdminProductosPage> {
     final nombreController = TextEditingController();
     final precioController = TextEditingController();
     final imagenController = TextEditingController();
+    String categoriaSeleccionada = 'Panes'; // Categoría por defecto
+
+    final List<String> categorias = [
+      'Panes',
+      'Galletas',
+      'Bizcochos',
+      'Postres',
+      'Pasteles',
+      'Bocaditos',
+    ];
 
     showDialog(
       context: context,
       builder: (_) {
         return AlertDialog(
           title: const Text("Agregar Producto"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nombreController,
-                decoration: const InputDecoration(
-                  labelText: "Nombre",
-                  prefixIcon: Icon(Icons.text_fields),
-                  border: OutlineInputBorder(),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nombreController,
+                  decoration: const InputDecoration(
+                    labelText: "Nombre",
+                    prefixIcon: Icon(Icons.text_fields),
+                    border: OutlineInputBorder(),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: precioController,
-                decoration: const InputDecoration(
-                  labelText: "Precio",
-                  prefixIcon: Icon(Icons.attach_money),
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: precioController,
+                  decoration: const InputDecoration(
+                    labelText: "Precio",
+                    prefixIcon: Icon(Icons.attach_money),
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
                 ),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: imagenController,
-                decoration: const InputDecoration(
-                  labelText: "URL de imagen (Drive o directa)",
-                  prefixIcon: Icon(Icons.image),
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: imagenController,
+                  decoration: const InputDecoration(
+                    labelText: "URL de imagen (Drive o directa)",
+                    prefixIcon: Icon(Icons.image),
+                    border: OutlineInputBorder(),
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  value: categoriaSeleccionada,
+                  decoration: const InputDecoration(
+                    labelText: 'Categoría',
+                    prefixIcon: Icon(Icons.category),
+                    border: OutlineInputBorder(),
+                  ),
+                  items: categorias.map((String categoria) {
+                    return DropdownMenuItem<String>(
+                      value: categoria,
+                      child: Text(categoria),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      categoriaSeleccionada = value!;
+                    });
+                  },
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
@@ -108,6 +140,7 @@ class _AdminProductosPageState extends State<AdminProductosPage> {
                   'nombre': nombre,
                   'precio': precio,
                   'imagen': imagen,
+                  'categoria': categoriaSeleccionada,
                 });
 
                 Navigator.pop(context);

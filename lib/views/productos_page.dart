@@ -9,8 +9,25 @@ import 'package:panaderia_delicia_web/widgets/social_buttons.dart';
 import 'package:provider/provider.dart';
 import 'package:panaderia_delicia_web/providers/carrito_provider.dart';
 
-class ProductosPage extends StatelessWidget {
+class ProductosPage extends StatefulWidget {
   const ProductosPage({super.key});
+
+  @override
+  State<ProductosPage> createState() => _ProductosPageState();
+}
+
+class _ProductosPageState extends State<ProductosPage> {
+  final List<String> categorias = [
+    'Todos',
+    'Panes',
+    'Galletas',
+    'Bizcochos',
+    'Postres',
+    'Pasteles',
+    'Bocaditos',
+  ];
+
+  String categoriaSeleccionada = 'Todos';
 
   String convertirEnlaceDriveADirecto(String enlaceDrive) {
     final regExp = RegExp(r'/d/([a-zA-Z0-9_-]+)');
@@ -103,22 +120,50 @@ class ProductosPage extends StatelessWidget {
         ],
       ),
       drawer: const SidebarMenu(),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('productos').snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Center(child: Text("Error al cargar productos"));
-          }
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Column(
+        children: [
+          const SizedBox(height: 10),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              children: categorias.map((cat) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: ChoiceChip(
+                    label: Text(cat),
+                    selected: categoriaSeleccionada == cat,
+                    onSelected: (_) {
+                      setState(() {
+                        categoriaSeleccionada = cat;
+                      });
+                    },
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          const Divider(),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('productos')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return const Center(child: Text("Error al cargar productos"));
+                }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-          final productos = snapshot.data!.docs;
+                final productos = snapshot.data!.docs.where((doc) {
+                  final data = doc.data() as Map<String, dynamic>;
+                  if (categoriaSeleccionada == 'Todos') return true;
+                  return data['categoria'] == categoriaSeleccionada;
+                }).toList();
 
-          return Column(
-            children: [
-              Expanded(
-                child: GridView.builder(
+                return GridView.builder(
                   padding: const EdgeInsets.all(16),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
@@ -145,7 +190,8 @@ class ProductosPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           ClipRRect(
-                            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                            borderRadius:
+                                const BorderRadius.vertical(top: Radius.circular(16)),
                             child: AspectRatio(
                               aspectRatio: 1.5,
                               child: Image.network(
@@ -215,20 +261,19 @@ class ProductosPage extends StatelessWidget {
                       ),
                     );
                   },
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Divider(),
-              const Text(
-                "Síguenos en nuestras redes",
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 8),
-              const SocialButtons(),
-              const SizedBox(height: 16),
-            ],
-          );
-        },
+                );
+              },
+            ),
+          ),
+          const Divider(),
+          const Text(
+            "Síguenos en nuestras redes",
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          const SocialButtons(),
+          const SizedBox(height: 16),
+        ],
       ),
     );
   }
