@@ -33,9 +33,24 @@ class _LoginPageState extends State<LoginPage> {
           );
         }
       } on FirebaseAuthException catch (e) {
+        String mensaje;
+        switch (e.code) {
+          case 'user-not-found':
+            mensaje = 'El correo ingresado no está registrado.';
+            break;
+          case 'wrong-password':
+            mensaje = 'La contraseña es incorrecta.';
+            break;
+          case 'invalid-email':
+            mensaje = 'El formato del correo es inválido.';
+            break;
+          default:
+            mensaje = 'Error al iniciar sesión. Verifica tus credenciales.';
+        }
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Error: ${e.message}")),
+            SnackBar(content: Text(mensaje)),
           );
         }
       } finally {

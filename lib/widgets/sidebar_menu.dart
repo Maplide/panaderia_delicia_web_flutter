@@ -5,82 +5,84 @@ import 'package:panaderia_delicia_web/views/pedidos_page.dart';
 import 'package:panaderia_delicia_web/views/ubicacion_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:panaderia_delicia_web/views/login_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SidebarMenu extends StatelessWidget {
   const SidebarMenu({super.key});
 
+  Future<String?> obtenerRolUsuario() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance.collection('usuarios').doc(user.uid).get();
+      return doc.data()?['rol'];
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: const Color(0xFFFFF3E0), // color crema claro
-      child: Column(
-        children: [
-          const SizedBox(height: 36),
-          const CircleAvatar(
-            radius: 36,
-            backgroundColor: Colors.white,
-            child: Icon(Icons.bakery_dining, size: 32, color: Color(0xFFF21D44)),
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            'Panadería Delicia',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFFB71C1C),
-            ),
-          ),
-          const SizedBox(height: 24),
-          _buildMenuItem(
-            context,
-            icon: Icons.home,
-            text: 'Inicio',
-            page: const HomePage(),
-          ),
-          _buildMenuItem(
-            context,
-            icon: Icons.shopping_bag,
-            text: 'Productos',
-            page: const ProductosPage(),
-          ),
-          _buildMenuItem(
-            context,
-            icon: Icons.list_alt,
-            text: 'Mis Pedidos',
-            page: const PedidosPage(),
-          ),
-          _buildMenuItem(
-            context,
-            icon: Icons.map,
-            text: 'Ubicación',
-            page: const UbicacionPage(),
-          ),
-          ListTile(
-            leading: const Icon(Icons.admin_panel_settings, color: Colors.black87),
-            title: const Text('Administrar productos'),
-            onTap: () {
-              Navigator.pushReplacementNamed(context, '/admin-productos');
-            },
-          ),
-          const Spacer(),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text(
-              'Cerrar sesión',
-              style: TextStyle(color: Colors.red),
-            ),
-            onTap: () async {
-              await FirebaseAuth.instance.signOut();
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (_) => const LoginPage()),
-                (route) => false,
-              );
-            },
-          ),
-          const SizedBox(height: 12),
-        ],
+      backgroundColor: const Color(0xFFFFF3E0),
+      child: FutureBuilder<String?>(
+        future: obtenerRolUsuario(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final rol = snapshot.data;
+
+          return Column(
+            children: [
+              const SizedBox(height: 36),
+              const CircleAvatar(
+                radius: 36,
+                backgroundColor: Colors.white,
+                child: Icon(Icons.bakery_dining, size: 32, color: Color(0xFFF21D44)),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Panadería Delicia',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFFB71C1C),
+                ),
+              ),
+              const SizedBox(height: 24),
+              _buildMenuItem(context, icon: Icons.home, text: 'Inicio', page: const HomePage()),
+              _buildMenuItem(context, icon: Icons.shopping_bag, text: 'Productos', page: const ProductosPage()),
+              _buildMenuItem(context, icon: Icons.list_alt, text: 'Mis Pedidos', page: const PedidosPage()),
+              _buildMenuItem(context, icon: Icons.map, text: 'Ubicación', page: const UbicacionPage()),
+
+              // Solo mostrar si es admin
+              if (rol == 'admin')
+                ListTile(
+                  leading: const Icon(Icons.admin_panel_settings, color: Colors.black87),
+                  title: const Text('Administrar productos'),
+                  onTap: () {
+                    Navigator.pushReplacementNamed(context, '/admin-productos');
+                  },
+                ),
+
+              const Spacer(),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.logout, color: Colors.red),
+                title: const Text('Cerrar sesión', style: TextStyle(color: Colors.red)),
+                onTap: () async {
+                  await FirebaseAuth.instance.signOut();
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginPage()),
+                    (route) => false,
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+            ],
+          );
+        },
       ),
     );
   }

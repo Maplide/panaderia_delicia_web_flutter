@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:panaderia_delicia_web/services/pedido_service.dart';
+import 'package:provider/provider.dart';
+import 'package:panaderia_delicia_web/providers/carrito_provider.dart';
 
 class CheckoutPage extends StatefulWidget {
   final List<Map<String, dynamic>> productos;
@@ -45,6 +47,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
         tipoEntrega: tipoEntrega,
         total: calcularTotal(),
       );
+
+      // 🧹 Limpia el carrito después de guardar el pedido
+      Provider.of<CarritoProvider>(context, listen: false).limpiarCarrito();
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Pedido registrado con éxito")),

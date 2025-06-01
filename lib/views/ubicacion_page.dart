@@ -18,13 +18,25 @@ class _UbicacionPageState extends State<UbicacionPage> {
   LatLng? ubicacionTienda;
   GoogleMapController? mapController;
   Set<Polyline> polylines = {};
+  BitmapDescriptor? iconoMoto;
   final String apiKey = "AIzaSyBIZrptkE0IGakPhzMzMpq4PaW_gw_D1vk"; // ← tu API KEY
 
   @override
   void initState() {
     super.initState();
+    cargarIconoMoto();
     obtenerUbicacionUsuario();
     obtenerUbicacionTienda();
+  }
+
+  void cargarIconoMoto() async {
+    final icono = await BitmapDescriptor.fromAssetImage(
+      const ImageConfiguration(size: Size(48, 48)),
+      'assets/icons/motodeliveryicono.png',
+    );
+    setState(() {
+      iconoMoto = icono;
+    });
   }
 
   Future<void> obtenerUbicacionUsuario() async {
@@ -69,11 +81,6 @@ class _UbicacionPageState extends State<UbicacionPage> {
 
   Future<void> obtenerUbicacionTienda() async {
     try {
-      // También puedes usar coordenadas fijas aquí si no quieres depender de Firestore:
-      // setState(() {
-      //   ubicacionTienda = LatLng(-12.058310811651916, -75.21244386159032);
-      // });
-
       final doc = await FirebaseFirestore.instance
           .collection('tienda')
           .doc('principal')
@@ -118,7 +125,7 @@ class _UbicacionPageState extends State<UbicacionPage> {
           polylines = {
             Polyline(
               polylineId: const PolylineId("ruta"),
-              color: Colors.green,
+              color: const Color(0xFFA64F1C),
               width: 5,
               points: ruta,
             ),
@@ -181,7 +188,7 @@ class _UbicacionPageState extends State<UbicacionPage> {
           ),
         ),
       ),
-      drawer: const SidebarMenu(), // ⬅️ Esto activa la barra lateral
+      drawer: const SidebarMenu(),
       body: (ubicacionUsuario == null || ubicacionTienda == null)
           ? const Center(child: CircularProgressIndicator())
           : GoogleMap(
@@ -194,8 +201,7 @@ class _UbicacionPageState extends State<UbicacionPage> {
                   markerId: const MarkerId("usuario"),
                   position: ubicacionUsuario!,
                   infoWindow: const InfoWindow(title: "Tu ubicación"),
-                  icon: BitmapDescriptor.defaultMarkerWithHue(
-                      BitmapDescriptor.hueAzure),
+                  icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
                 ),
                 Marker(
                   markerId: const MarkerId("tienda"),
@@ -203,6 +209,13 @@ class _UbicacionPageState extends State<UbicacionPage> {
                   infoWindow: const InfoWindow(title: "TotyFarma - Panadería"),
                   icon: BitmapDescriptor.defaultMarker,
                 ),
+                if (polylines.isNotEmpty && iconoMoto != null)
+                  Marker(
+                    markerId: const MarkerId("delivery"),
+                    position: polylines.first.points[polylines.first.points.length ~/ 2],
+                    icon: iconoMoto!,
+                    infoWindow: const InfoWindow(title: "Delivery en camino"),
+                  ),
               },
               polylines: polylines,
               onMapCreated: (controller) => mapController = controller,
