@@ -206,7 +206,7 @@ class _UbicacionPageState extends State<UbicacionPage> {
                 Marker(
                   markerId: const MarkerId("tienda"),
                   position: ubicacionTienda!,
-                  infoWindow: const InfoWindow(title: "TotyFarma - Panadería"),
+                  infoWindow: const InfoWindow(title: "Panadería delicia"),
                   icon: BitmapDescriptor.defaultMarker,
                 ),
                 if (polylines.isNotEmpty && iconoMoto != null)
