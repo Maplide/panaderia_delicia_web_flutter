@@ -1,16 +1,34 @@
-# panaderia_delicia_web
+# 🥐 Panadería Delicia – App Flutter
 
-A new Flutter project.
+Aplicativo móvil desarrollado con **Flutter** para gestionar pedidos en una panadería local.  
+Permite a los usuarios registrarse, visualizar productos, agregar al carrito, seleccionar ubicación y realizar pedidos, todo en tiempo real con **Firebase**.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 🚀 Funcionalidades principales
 
-A few resources to get you started if this is your first Flutter project:
+- Registro e inicio de sesión con **Firebase Auth**
+- Visualización dinámica de productos (catálogo)
+- Carrito de compras con control de stock
+- Confirmación de pedidos y visualización del historial
+- Selección de ubicación en **Google Maps**
+- Gestión diferenciada por rol (**admin / usuario**)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🛠️ Tecnologías utilizadas
+
+- Flutter + Dart  
+- Firebase (Auth, Firestore, Storage)  
+- Google Maps API  
+- Geolocator  
+- Provider (gestión de estado)
+
+---
+
+## 📦 Instalación
+
+Clona el repositorio:
+
+```bash
+git clone https://github.com/tuusuario/panaderia-delicia.git
